@@ -4,11 +4,11 @@ import "github.com/graphql-go/graphql"
 
 // User struct that holds an Address as well
 type User struct {
-	ID        int64   `json:"id"`
-	Firstname string  `json:"firstName"`
-	LastName  string  `json:"lastName"`
-	Address   Address `json:"address"`
-	Phone     string  `json:"phone"`
+	ID        int64  `json:"id"`
+	Firstname string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Address   `json:"address"`
+	Phone     string `json:"phone"`
 }
 
 // UserType : User GraphQL Schema
@@ -19,8 +19,42 @@ var UserType = graphql.NewObject(
 			"id":        &graphql.Field{Type: graphql.Int},
 			"firstName": &graphql.Field{Type: graphql.String},
 			"lastName":  &graphql.Field{Type: graphql.String},
-			"address":   &graphql.Field{Type: AddressType},
-			"phone":     &graphql.Field{Type: graphql.String},
+			"street1": &graphql.Field{
+				Type: graphql.String,
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					add := p.Source.(User)
+					return add.Street1, nil
+				},
+			},
+			"street2": &graphql.Field{
+				Type: graphql.String,
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					add := p.Source.(User)
+					return add.Street2, nil
+				},
+			},
+			"city": &graphql.Field{
+				Type: graphql.String,
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					add := p.Source.(User)
+					return add.City, nil
+				},
+			},
+			"state": &graphql.Field{
+				Type: graphql.String,
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					add := p.Source.(User)
+					return add.State, nil
+				},
+			},
+			"zipcode": &graphql.Field{
+				Type: graphql.String,
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					add := p.Source.(User)
+					return add.ZipCode, nil
+				},
+			},
+			"phone": &graphql.Field{Type: graphql.String},
 		},
 	},
 )

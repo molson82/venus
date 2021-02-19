@@ -6,12 +6,14 @@ import (
 	"net/http"
 
 	"github.com/graphql-go/graphql"
+	"github.com/molson82/venus/mutations"
 	"github.com/molson82/venus/queries"
 )
 
 var schema, _ = graphql.NewSchema(
 	graphql.SchemaConfig{
-		Query: queries.UserQueryType,
+		Query:    queries.UserQueryType,
+		Mutation: mutations.UserMutationType,
 	},
 )
 

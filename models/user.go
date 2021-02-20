@@ -19,42 +19,8 @@ var UserType = graphql.NewObject(
 			"id":        &graphql.Field{Type: graphql.Int},
 			"firstName": &graphql.Field{Type: graphql.String},
 			"lastName":  &graphql.Field{Type: graphql.String},
-			"street1": &graphql.Field{
-				Type: graphql.String,
-				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					add := p.Source.(User)
-					return add.Address.Street1, nil
-				},
-			},
-			"street2": &graphql.Field{
-				Type: graphql.String,
-				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					add := p.Source.(User)
-					return add.Address.Street2, nil
-				},
-			},
-			"city": &graphql.Field{
-				Type: graphql.String,
-				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					add := p.Source.(User)
-					return add.Address.City, nil
-				},
-			},
-			"state": &graphql.Field{
-				Type: graphql.String,
-				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					add := p.Source.(User)
-					return add.Address.State, nil
-				},
-			},
-			"zipcode": &graphql.Field{
-				Type: graphql.String,
-				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					add := p.Source.(User)
-					return add.Address.ZipCode, nil
-				},
-			},
-			"phone": &graphql.Field{Type: graphql.String},
+			"address":   &graphql.Field{Type: AddressType},
+			"phone":     &graphql.Field{Type: graphql.String},
 		},
 	},
 )

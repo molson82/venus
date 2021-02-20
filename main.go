@@ -10,7 +10,7 @@ import (
 	"github.com/molson82/venus/queries"
 )
 
-var schema, _ = graphql.NewSchema(
+var userSchema, _ = graphql.NewSchema(
 	graphql.SchemaConfig{
 		Query:    queries.UserQueryType,
 		Mutation: mutations.UserMutationType,
@@ -29,8 +29,10 @@ func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 }
 
 func main() {
+	// fsClient := config.SetupFirebaseConfig()
+
 	http.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
-		result := executeQuery(r.URL.Query().Get("query"), schema)
+		result := executeQuery(r.URL.Query().Get("query"), userSchema)
 		json.NewEncoder(w).Encode(result)
 	})
 

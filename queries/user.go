@@ -1,13 +1,13 @@
 package queries
 
 import (
-	"github.com/graphql-go/graphql"
-	"github.com/molson82/venus/data"
-	"github.com/molson82/venus/models"
-)
+	"context"
 
-// MockUserData : public mock user data
-var MockUserData = data.UserMockData()
+	"github.com/graphql-go/graphql"
+	"github.com/molson82/venus/config"
+	"github.com/molson82/venus/models"
+	"google.golang.org/api/iterator"
+)
 
 // UserQueryType : the GraphQL query type for User schema
 var UserQueryType = graphql.NewObject(
@@ -18,27 +18,50 @@ var UserQueryType = graphql.NewObject(
 				Type:        models.UserType,
 				Description: "Get user by id",
 				Args: graphql.FieldConfigArgument{
-					"id": &graphql.ArgumentConfig{Type: graphql.Int},
+					"id": &graphql.ArgumentConfig{Type: graphql.String},
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					id, ok := p.Args["id"].(int)
+					var user models.User
+					id, ok := p.Args["id"].(string)
 					if ok {
 						// id exists
-						for _, user := range MockUserData {
-							if int(user.ID) == id {
-								return user, nil
-							}
+						dataSnap, err := config.FSClient.DBClient.Collection("user").Doc(id).Get(context.Background())
+						if err != nil {
+							return nil, err
 						}
+						dataSnap.DataTo(&user)
 					}
 
-					return nil, nil
+					return user, nil
 				},
 			},
 			"list": &graphql.Field{
 				Type:        graphql.NewList(models.UserType),
 				Description: "Get user list",
+				Args: graphql.FieldConfigArgument{
+					"limit": &graphql.ArgumentConfig{Type: graphql.Int},
+				},
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-					return MockUserData, nil
+					var users []models.User
+					limit, ok := params.Args["limit"].(int)
+					if !ok {
+						limit = 100
+					}
+					docIter := config.FSClient.DBClient.Collection("user").Limit(limit).Documents(context.Background())
+					for {
+						doc, err := docIter.Next()
+						if err == iterator.Done {
+							break
+						}
+						if err != nil {
+							return nil, err
+						}
+						var u models.User
+						doc.DataTo(&u)
+						users = append(users, u)
+					}
+
+					return users, nil
 				},
 			},
 		},

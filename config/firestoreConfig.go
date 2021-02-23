@@ -28,13 +28,20 @@ type firebaseCred struct {
 }
 
 // FSClient : list of firestore clients
-type FSClient struct {
+type fsClient struct {
 	AuthClient *auth.Client
 	DBClient   *firestore.Client
 }
 
+// FSClient : instance of the firestore client configs
+var FSClient *fsClient
+
+func init() {
+	FSClient = setupFirebaseConfig()
+}
+
 // SetupFirebaseConfig : Return list of firestore clients
-func SetupFirebaseConfig() *FSClient {
+func setupFirebaseConfig() *fsClient {
 	opt := option.WithCredentialsJSON(createCredentials())
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
@@ -52,7 +59,7 @@ func SetupFirebaseConfig() *FSClient {
 		log.Fatalf("error getting Firestore client: %v\n", err3)
 	}
 
-	return &FSClient{
+	return &fsClient{
 		AuthClient: authclient,
 		DBClient:   dbClient,
 	}

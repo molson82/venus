@@ -1,13 +1,11 @@
 package mutations
 
 import (
-	"log"
-	"math/rand"
-	"time"
+	"context"
 
 	"github.com/graphql-go/graphql"
+	"github.com/molson82/venus/config"
 	"github.com/molson82/venus/models"
-	"github.com/molson82/venus/queries"
 )
 
 // UserMutationType : User Graphql schema mutations. Create Update Delete
@@ -23,16 +21,18 @@ var UserMutationType = graphql.NewObject(graphql.ObjectConfig{
 				"phone":     &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
 			},
 			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-				rand.Seed(time.Now().UnixNano())
-				user := models.User{
-					ID:        int64(rand.Intn(100000)),
+				newUser := models.User{
 					Firstname: params.Args["firstName"].(string),
 					LastName:  params.Args["lastName"].(string),
 					Phone:     params.Args["phone"].(string),
 				}
-				log.Printf("new User logged: %v\n", user)
-				queries.MockUserData = append(queries.MockUserData, user)
-				return user, nil
+				data, _, err := config.FSClient.DBClient.Collection("user").Add(context.Background(), newUser)
+				if err != nil {
+					return nil, err
+				}
+				newUser.ID = data.ID
+
+				return newUser, nil
 			},
 		},
 		"update": &graphql.Field{
@@ -45,27 +45,27 @@ var UserMutationType = graphql.NewObject(graphql.ObjectConfig{
 				"phone":     &graphql.ArgumentConfig{Type: graphql.Int},
 			},
 			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-				id, _ := params.Args["id"].(int)
-				firstName, fnOk := params.Args["firstName"].(string)
-				lastName, lnOk := params.Args["lastName"].(string)
-				phone, pOk := params.Args["phone"].(string)
-				updatedUser := models.User{}
-				for i, u := range queries.MockUserData {
-					if int64(id) == u.ID {
-						if fnOk {
-							queries.MockUserData[i].Firstname = firstName
-						}
-						if lnOk {
-							queries.MockUserData[i].LastName = lastName
-						}
-						if pOk {
-							queries.MockUserData[i].Phone = phone
-						}
-						updatedUser = queries.MockUserData[i]
-						break
-					}
-				}
-				return updatedUser, nil
+				// id, _ := params.Args["id"].(int)
+				// firstName, fnOk := params.Args["firstName"].(string)
+				// lastName, lnOk := params.Args["lastName"].(string)
+				// phone, pOk := params.Args["phone"].(string)
+				// updatedUser := models.User{}
+				// for i, u := range queries.MockUserData {
+				// 	if string(id) == u.ID {
+				// 		if fnOk {
+				// 			queries.MockUserData[i].Firstname = firstName
+				// 		}
+				// 		if lnOk {
+				// 			queries.MockUserData[i].LastName = lastName
+				// 		}
+				// 		if pOk {
+				// 			queries.MockUserData[i].Phone = phone
+				// 		}
+				// 		updatedUser = queries.MockUserData[i]
+				// 		break
+				// 	}
+				// }
+				return nil, nil
 			},
 		},
 		"delete": &graphql.Field{
@@ -75,15 +75,15 @@ var UserMutationType = graphql.NewObject(graphql.ObjectConfig{
 				"id": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.Int)},
 			},
 			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-				id, _ := params.Args["id"].(int)
-				deletedUser := models.User{}
-				for i, u := range queries.MockUserData {
-					if int64(id) == u.ID {
-						deletedUser = queries.MockUserData[i]
-						queries.MockUserData = append(queries.MockUserData[:i], queries.MockUserData[i+1:]...)
-					}
-				}
-				return deletedUser, nil
+				// id, _ := params.Args["id"].(string)
+				// deletedUser := models.User{}
+				// for i, u := range queries.MockUserData {
+				// 	if id == u.ID {
+				// 		deletedUser = queries.MockUserData[i]
+				// 		queries.MockUserData = append(queries.MockUserData[:i], queries.MockUserData[i+1:]...)
+				// 	}
+				// }
+				return nil, nil
 			},
 		},
 	},

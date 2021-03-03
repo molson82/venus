@@ -5,7 +5,7 @@ import "github.com/graphql-go/graphql"
 // User struct that holds an Address as well
 type User struct {
 	ID        string `firestore:"id,omitempty" json:"id"`
-	Firstname string `firestore:"firstName,omitempty" json:"firstName"`
+	FirstName string `firestore:"firstName,omitempty" json:"firstName"`
 	LastName  string `firestore:"lastName,omitempty" json:"lastName"`
 	Phone     string `firestore:"phone,omitempty" json:"phone"`
 }

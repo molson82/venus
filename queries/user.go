@@ -30,6 +30,7 @@ var UserQueryType = graphql.NewObject(
 							return nil, err
 						}
 						dataSnap.DataTo(&user)
+						user.ID = id
 					}
 
 					return user, nil
@@ -58,6 +59,7 @@ var UserQueryType = graphql.NewObject(
 						}
 						var u models.User
 						doc.DataTo(&u)
+						u.ID = doc.Ref.ID
 						users = append(users, u)
 					}
 

@@ -22,7 +22,7 @@ var UserMutationType = graphql.NewObject(graphql.ObjectConfig{
 			},
 			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 				newUser := models.User{
-					Firstname: params.Args["firstName"].(string),
+					FirstName: params.Args["firstName"].(string),
 					LastName:  params.Args["lastName"].(string),
 					Phone:     params.Args["phone"].(string),
 				}
@@ -39,33 +39,27 @@ var UserMutationType = graphql.NewObject(graphql.ObjectConfig{
 			Type:        models.UserType,
 			Description: "Update user by id",
 			Args: graphql.FieldConfigArgument{
-				"id":        &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.Int)},
+				"id":        &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
 				"firstName": &graphql.ArgumentConfig{Type: graphql.String},
 				"lastName":  &graphql.ArgumentConfig{Type: graphql.String},
-				"phone":     &graphql.ArgumentConfig{Type: graphql.Int},
+				"phone":     &graphql.ArgumentConfig{Type: graphql.String},
 			},
 			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-				// id, _ := params.Args["id"].(int)
-				// firstName, fnOk := params.Args["firstName"].(string)
-				// lastName, lnOk := params.Args["lastName"].(string)
-				// phone, pOk := params.Args["phone"].(string)
-				// updatedUser := models.User{}
-				// for i, u := range queries.MockUserData {
-				// 	if string(id) == u.ID {
-				// 		if fnOk {
-				// 			queries.MockUserData[i].Firstname = firstName
-				// 		}
-				// 		if lnOk {
-				// 			queries.MockUserData[i].LastName = lastName
-				// 		}
-				// 		if pOk {
-				// 			queries.MockUserData[i].Phone = phone
-				// 		}
-				// 		updatedUser = queries.MockUserData[i]
-				// 		break
-				// 	}
-				// }
-				return nil, nil
+				id, _ := params.Args["id"].(string)
+				updatedUser := createUpdateList(params, models.User{})
+				_, err := config.FSClient.DBClient.Collection("user").Doc(id).Update(context.Background(), updatedUser)
+				if err != nil {
+					return nil, err
+				}
+				dataSnap, geterr := config.FSClient.DBClient.Collection("user").Doc(id).Get(context.Background())
+				if geterr != nil {
+					return nil, geterr
+				}
+				var user models.User
+				dataSnap.DataTo(&user)
+				user.ID = id
+
+				return user, nil
 			},
 		},
 		"delete": &graphql.Field{

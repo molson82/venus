@@ -1,11 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/graphql-go/graphql"
+	"github.com/graphql-go/handler"
 	"github.com/molson82/venus/mutations"
 	"github.com/molson82/venus/queries"
 )
@@ -29,10 +29,13 @@ func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 }
 
 func main() {
-	http.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
-		result := executeQuery(r.URL.Query().Get("query"), userSchema)
-		json.NewEncoder(w).Encode(result)
+	userHandler := handler.New(&handler.Config{
+		Schema:   &userSchema,
+		Pretty:   true,
+		GraphiQL: true,
 	})
+
+	http.Handle("/user", userHandler)
 
 	fmt.Println("Server is running on port 8000")
 	http.ListenAndServe(":8000", nil)

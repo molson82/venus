@@ -66,18 +66,23 @@ var UserMutationType = graphql.NewObject(graphql.ObjectConfig{
 			Type:        models.UserType,
 			Description: "Delete user by id",
 			Args: graphql.FieldConfigArgument{
-				"id": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.Int)},
+				"id": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
 			},
 			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-				// id, _ := params.Args["id"].(string)
-				// deletedUser := models.User{}
-				// for i, u := range queries.MockUserData {
-				// 	if id == u.ID {
-				// 		deletedUser = queries.MockUserData[i]
-				// 		queries.MockUserData = append(queries.MockUserData[:i], queries.MockUserData[i+1:]...)
-				// 	}
-				// }
-				return nil, nil
+				id, _ := params.Args["id"].(string)
+				dataSnap, geterr := config.FSClient.DBClient.Collection("user").Doc(id).Get(context.Background())
+				if geterr != nil {
+					return nil, geterr
+				}
+				var user models.User
+				dataSnap.DataTo(&user)
+				user.ID = id
+				_, err := config.FSClient.DBClient.Collection("user").Doc(id).Delete(context.Background())
+				if err != nil {
+					return nil, err
+				}
+
+				return user, nil
 			},
 		},
 	},

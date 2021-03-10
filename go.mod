@@ -1,6 +1,6 @@
 module github.com/molson82/venus
 
-go 1.14
+go 1.16
 
 require (
 	cloud.google.com/go/firestore v1.1.1

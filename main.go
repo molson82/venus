@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
@@ -26,7 +27,7 @@ func main() {
 
 	http.Handle("/user", userHandler)
 
-	fmt.Println("Server is running on port 8000")
-	http.ListenAndServe(":8000", nil)
+	fmt.Printf("Server is running on port %q", os.Getenv("PORT"))
+	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 
 }
